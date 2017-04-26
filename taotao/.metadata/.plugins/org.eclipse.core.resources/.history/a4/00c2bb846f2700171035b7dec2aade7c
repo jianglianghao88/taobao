@@ -1,0 +1,38 @@
+package com.taotao.portal.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.taotao.common.pojo.TaotaoResult;
+import com.taotao.common.utils.CookieUtils;
+import com.taotao.common.utils.JsonUtils;
+import com.taotao.portal.pojo.CartItem;
+import com.taotao.portal.service.CartService;
+
+public class CartServiceImpl implements CartService{
+
+	@Override
+	public TaotaoResult addCart(Long itemId, Integer num,
+			HttpServletRequest request, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private List<CartItem> getItemList(HttpServletRequest request){
+		
+		try {
+			String json = CookieUtils.getCookieValue(request, "TT_CART", true);
+			
+			List<CartItem> list = JsonUtils.jsonToList(json, CartItem.class);
+		
+			return list == null ? new ArrayList<CartItem>():list;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}

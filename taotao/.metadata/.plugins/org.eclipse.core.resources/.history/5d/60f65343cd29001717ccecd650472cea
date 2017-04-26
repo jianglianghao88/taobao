@@ -1,0 +1,40 @@
+package com.taotao.order.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.taotao.common.pojo.TaotaoResult;
+import com.taotao.mapper.TbOrderItemMapper;
+import com.taotao.mapper.TbOrderMapper;
+import com.taotao.mapper.TbOrderShippingMapper;
+import com.taotao.order.pojo.OrderInfo;
+import com.taotao.order.redis.JedisClient;
+import com.taotao.order.service.OrderService;
+
+@Service
+public class OrderServiceImpl implements OrderService{
+	
+	@Value("${REDIS_ORDER_GEN_KEY}")
+	private String REDIS_ORDER_GEN_KEY;
+	@Value("${REDIS_ORDER_BEGIN}")
+	private String REDIS_ORDER_BEGIN;
+	@Value("${REDIS_ORDER_DETAIL_KEY}")
+	private String REDIS_ORDER_DETAIL_KEY;
+	
+	@Autowired
+	private TbOrderMapper orderMapper;
+	@Autowired
+	private TbOrderItemMapper orderItemMapper;
+	@Autowired
+	private TbOrderShippingMapper orderShippingMapper;
+	
+	@Autowired
+	private JedisClient jedisClient;
+
+	@Override
+	public TaotaoResult createOrder(OrderInfo orderInfo) {
+		return null;
+	}
+
+}

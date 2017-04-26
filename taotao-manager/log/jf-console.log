@@ -1,0 +1,6 @@
+[2017-01-15 19:10:02,806] [main] (BaseJdbcLogger.java:139) DEBUG com.taotao.mapper.TbItemMapper.selectByExample_PageHelper_Count - ==>  Preparing: SELECT count(*) FROM tb_item 
+[2017-01-15 19:10:02,843] [main] (BaseJdbcLogger.java:139) DEBUG com.taotao.mapper.TbItemMapper.selectByExample_PageHelper_Count - ==> Parameters: 
+[2017-01-15 19:10:03,002] [main] (BaseJdbcLogger.java:139) DEBUG com.taotao.mapper.TbItemMapper.selectByExample_PageHelper_Count - <==      Total: 1
+[2017-01-15 19:10:03,015] [main] (BaseJdbcLogger.java:139) DEBUG com.taotao.mapper.TbItemMapper.selectByExample_PageHelper - ==>  Preparing: select id, title, sell_point, price, num, barcode, image, cid, status, created, updated from tb_item limit ?,? 
+[2017-01-15 19:10:03,015] [main] (BaseJdbcLogger.java:139) DEBUG com.taotao.mapper.TbItemMapper.selectByExample_PageHelper - ==> Parameters: 0(Integer), 30(Integer)
+[2017-01-15 19:10:03,044] [main] (BaseJdbcLogger.java:139) DEBUG com.taotao.mapper.TbItemMapper.selectByExample_PageHelper - <==      Total: 30

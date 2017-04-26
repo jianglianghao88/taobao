@@ -1,0 +1,55 @@
+package com.taotao.portal.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.taotao.pojo.TbUser;
+import com.taotao.portal.pojo.CartItem;
+import com.taotao.portal.pojo.OrderInfo;
+import com.taotao.portal.service.CartService;
+import com.taotao.portal.service.OrderService;
+
+@Controller
+@RequestMapping("/order")
+public class OrderController {
+
+	@Autowired
+	private CartService cartService;
+	@Autowired
+	private OrderService orderService;
+	
+	@RequestMapping("/order-cart")
+	public String showOrder(HttpServletRequest request , Model model){
+		
+		List<CartItem> items = cartService.getItems(request);
+		
+		model.addAttribute("cartList", items);
+		
+		return "order-cart";
+	}
+	
+	@RequestMapping(value="/create",method=RequestMethod.POST)
+	public String createOrder(OrderInfo orderInfo , Model model , HttpServletRequest request){
+		TbUser user = (TbUser) request.getAttribute("user");
+		
+		orderInfo.setUserId(user.getId());
+		orderInfo.setBuyerNick(user.getUsername());
+		
+		String orderId = orderService.createOrder(orderInfo);
+		
+		model.addAttribute("orderId", orderId);
+		model.addAttribute("payment", orderInfo.getPayment());
+		model.addAttribute("date", new DateTime().plusDays(3).toString("yyyy-MM-dd"));
+		
+		return "success";
+	}
+	
+}

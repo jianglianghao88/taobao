@@ -1,0 +1,215 @@
+package com.taotao.portal.service.impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.taotao.common.pojo.TaotaoResult;
+import com.taotao.common.utils.CookieUtils;
+import com.taotao.common.utils.JsonUtils;
+import com.taotao.pojo.TbItem;
+import com.taotao.pojo.TbUser;
+import com.taotao.portal.pojo.CartItem;
+import com.taotao.portal.redis.JedisClient;
+import com.taotao.portal.service.CartService;
+import com.taotao.portal.service.ItemService;
+import com.taotao.portal.service.UserService;
+
+@Service
+public class CartServiceImpl implements CartService{
+	
+	@Autowired
+	private ItemService itemService;
+	@Value("${COOKIE_EXPIRE}")
+	private Integer COOKIE_EXPIRE;
+	@Autowired
+	private JedisClient jedisClient;
+	@Value("${SSO_LOGIN_URL}")
+	private String SSO_LOGIN_URL;
+	@Autowired
+	private UserService userService;
+
+	@Override
+	public TaotaoResult addCart(Long itemId, Integer num,
+			HttpServletRequest request, HttpServletResponse response) {
+		List<CartItem> list = getItemList(request);
+		
+		boolean login = login(request, response);
+		
+		if(login){
+			if(StringUtils.isEmpty(jedisClient.get("CART"))){
+				setCartItemToRedis(JsonUtils.objectToJson(list));
+			}
+			String json = jedisClient.get("CART");
+			List<CartItem> itemList = JsonUtils.jsonToList(json, CartItem.class);
+			updateCart(itemList, itemId, num);
+			setCartItemToRedis(JsonUtils.objectToJson(list));
+		}else{
+			updateCart(list, itemId, num);
+			CookieUtils.setCookie(request, response, "TT_CART", JsonUtils.objectToJson(list), COOKIE_EXPIRE, true);
+		}
+		
+		
+		
+		return TaotaoResult.ok();
+	}
+	
+	private List<CartItem> getItemList(HttpServletRequest request){
+		boolean login = login(request, response);
+		try {
+			if(login){
+				String json =  jedisClient.get("CART");
+			}else{
+				
+				String json = CookieUtils.getCookieValue(request, "TT_CART", true);
+			}
+			
+			
+			List<CartItem> list = JsonUtils.jsonToList(json, CartItem.class);
+		
+			return list == null ? new ArrayList<CartItem>():list;
+		} catch (Exception e) {
+			return new ArrayList<CartItem>();
+		}
+	}
+
+	@Override
+	public List<CartItem> getItems(HttpServletRequest request) {
+		
+		List<CartItem> list = getItemList(request);
+		
+		return list;
+	}
+
+	@Override
+	public TaotaoResult updateCartItem(long itemId, Integer num,
+			HttpServletRequest request, HttpServletResponse response) {
+
+		List<CartItem> list = getItemList(request);
+		boolean login = login(request, response);
+		if(login){
+			if(StringUtils.isEmpty(jedisClient.get("CART"))){
+				setCartItemToRedis(JsonUtils.objectToJson(list));
+			}
+			String json = jedisClient.get("CART");
+			List<CartItem> itemList = JsonUtils.jsonToList(json, CartItem.class);
+			for (CartItem cartItem : itemList) {
+				if(cartItem.getId() == itemId){
+					cartItem.setNum(num);
+					break;
+				}
+				
+			}
+			setCartItemToRedis(JsonUtils.objectToJson(itemList));
+			
+		}else{
+
+			for (CartItem cartItem : list) {
+				if(cartItem.getId() == itemId){
+					cartItem.setNum(num);
+					break;
+				}
+				
+			}
+			CookieUtils.setCookie(request, response, "TT_CART", JsonUtils.objectToJson(list), COOKIE_EXPIRE, true);
+			
+		}
+		
+		
+		return TaotaoResult.ok();
+	}
+
+	@Override
+	public TaotaoResult deleteCartItem(long itemId, HttpServletRequest request,
+			HttpServletResponse response) {
+
+		List<CartItem> list = getItemList(request);
+		
+		boolean login = login(request, response);
+		if(login){
+			if(StringUtils.isEmpty(jedisClient.get("CART"))){
+				setCartItemToRedis(JsonUtils.objectToJson(list));
+			}
+			String json = jedisClient.get("CART");
+			List<CartItem> itemList = JsonUtils.jsonToList(json, CartItem.class);
+			for (CartItem cartItem : itemList) {
+				if(cartItem.getId() == itemId){
+
+					list.remove(cartItem);
+					break;
+				}
+				
+			}
+			setCartItemToRedis(JsonUtils.objectToJson(itemList));
+			
+		}else{
+			for (CartItem cartItem : list) {
+				if(cartItem.getId() == itemId){
+
+					list.remove(cartItem);
+					break;
+				}
+				
+			}
+			CookieUtils.setCookie(request, response, "TT_CART", JsonUtils.objectToJson(list), COOKIE_EXPIRE, true);
+			
+		}
+		
+		
+		
+		return TaotaoResult.ok();
+	}
+	
+	private void setCartItemToRedis(String cartItem){
+		jedisClient.set("CART", cartItem);
+		jedisClient.expire("CART", COOKIE_EXPIRE);
+	}
+	
+	private boolean login(HttpServletRequest request , HttpServletResponse response){
+		TbUser user = userService.getUserByToken(request, response);
+		if(user == null){
+
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private void updateCart(List<CartItem> list , long itemId , Integer num){
+		boolean flag = false;
+		for (CartItem cartItem : list) {
+			if(cartItem.getId().longValue() == itemId){
+				cartItem.setNum(num + cartItem.getNum());
+				flag = true;
+				break;
+			}
+		}
+		if(!flag){
+			TbItem tbItem = itemService.getItemById(itemId);
+			CartItem cartItem = new CartItem();
+			cartItem.setId(itemId);
+			cartItem.setNum(num);
+			cartItem.setPrice(tbItem.getPrice());
+			cartItem.setTitle(tbItem.getTitle());
+			String image = tbItem.getImage();
+			
+			if(StringUtils.isNotBlank(image)){
+				
+				String[] strings = image.split(",");
+				cartItem.setImages(strings[0]);
+			}
+			
+			list.add(cartItem);
+			
+		}
+	}
+
+}

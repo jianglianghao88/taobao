@@ -1,0 +1,81 @@
+package com.taotao.order.service.impl;
+
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.taotao.common.pojo.TaotaoResult;
+import com.taotao.mapper.TbOrderItemMapper;
+import com.taotao.mapper.TbOrderMapper;
+import com.taotao.mapper.TbOrderShippingMapper;
+import com.taotao.order.pojo.OrderInfo;
+import com.taotao.order.redis.JedisClient;
+import com.taotao.order.service.OrderService;
+import com.taotao.pojo.TbOrderItem;
+import com.taotao.pojo.TbOrderShipping;
+
+@Service
+public class OrderServiceImpl implements OrderService{
+	
+	@Value("${REDIS_ORDER_GEN_KEY}")
+	private String REDIS_ORDER_GEN_KEY;
+	@Value("${REDIS_ORDER_BEGIN}")
+	private String REDIS_ORDER_BEGIN;
+	@Value("${REDIS_ORDER_DETAIL_KEY}")
+	private String REDIS_ORDER_DETAIL_KEY;
+	
+	@Autowired
+	private TbOrderMapper orderMapper;
+	@Autowired
+	private TbOrderItemMapper orderItemMapper;
+	@Autowired
+	private TbOrderShippingMapper orderShippingMapper;
+	
+	@Autowired
+	private JedisClient jedisClient;
+
+	@Override
+	public TaotaoResult createOrder(OrderInfo orderInfo) {
+
+		String orderKey = jedisClient.get(REDIS_ORDER_GEN_KEY);
+	
+		if(StringUtils.isEmpty(orderKey)){
+			jedisClient.set(REDIS_ORDER_GEN_KEY, REDIS_ORDER_BEGIN);
+		}
+		
+		Long orderId = jedisClient.incr(REDIS_ORDER_GEN_KEY);
+		
+		orderInfo.setOrderId(orderId.toString());
+		orderInfo.setStatus(1);
+		orderInfo.setCreateTime(new Date());
+		orderInfo.setUpdateTime(new Date());
+		
+		orderMapper.insert(orderInfo);
+		
+		//插入订单项
+		List<TbOrderItem> orderItems = orderInfo.getOrderItems();
+		for (TbOrderItem tbOrderItem : orderItems) {
+			Long orderItemId = jedisClient.incr(REDIS_ORDER_DETAIL_KEY);
+			tbOrderItem.setId(orderItemId.toString());
+			tbOrderItem.setOrderId(orderId.toString());
+
+			orderItemMapper.insert(tbOrderItem);
+		}
+		
+		//插入无论信息
+		TbOrderShipping orderShipping = orderInfo.getOrderShipping();
+		
+		orderShipping.setOrderId(orderId.toString());
+		orderShipping.setCreated(new Date());
+		orderShipping.setUpdated(new Date());
+	
+		orderShippingMapper.insert(orderShipping);
+		
+		return TaotaoResult.ok(orderId);
+	}
+
+}

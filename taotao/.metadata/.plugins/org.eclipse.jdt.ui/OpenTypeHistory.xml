@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<typeInfoHistroy>
+<typeInfo handle="=taotao-search/src\/main\/java&lt;com.taotao.search.service{ItemService.java[ItemService" modifiers="513" timestamp="1489421485343"/>
+<typeInfo handle="=taotao-search/src\/main\/java&lt;com.taotao.search.dao{SearchDao.java[SearchDao" modifiers="513" timestamp="1489590931489"/>
+<typeInfo handle="=taotao-portal/src\/main\/java&lt;com.taotao.portal.service{SearchService.java[SearchService" modifiers="513" timestamp="1489678861494"/>
+<typeInfo handle="=taotao-search/E:\/Program Files\/Repositories\/Repositories\/Maven\/org\/apache\/activemq\/activemq-all\/5.11.2\/activemq-all-5.11.2.jar&lt;javax.jms(MessageListener.class[MessageListener" modifiers="1537" timestamp="1490108857856"/>
+<typeInfo handle="=taotao-rest/src\/main\/java&lt;com.taotao.rest.service{ItemParamService.java[ItemParamService" modifiers="513" timestamp="1490714733466"/>
+<typeInfo handle="=taotao-sso/src\/main\/java&lt;com.taotao.sso.service{LoginService.java[LoginService" modifiers="513" timestamp="1492442500368"/>
+<typeInfo handle="=taotao-portal/src\/main\/java&lt;com.taotao.portal.service{UserService.java[UserService" modifiers="513" timestamp="1492525419940"/>
+<typeInfo handle="=taotao-portal/E:\/Program Files\/Repositories\/Repositories\/Maven\/org\/springframework\/spring-webmvc\/4.2.4.RELEASE\/spring-webmvc-4.2.4.RELEASE.jar&lt;org.springframework.web.servlet(HandlerInterceptor.class[HandlerInterceptor" modifiers="1537" timestamp="1490512352679"/>
+<typeInfo handle="=taotao-portal/E:\/Program Files\/Repositories\/Repositories\/Maven\/org\/springframework\/spring-webmvc\/4.2.4.RELEASE\/spring-webmvc-4.2.4.RELEASE.jar&lt;org.springframework.web.servlet(HandlerAdapter.class[HandlerAdapter" modifiers="1537" timestamp="1490512352679"/>
+</typeInfoHistroy>

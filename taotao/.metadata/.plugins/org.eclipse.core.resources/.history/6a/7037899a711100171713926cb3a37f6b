@@ -1,0 +1,111 @@
+package com.taotao.test.activemq;
+
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.junit.Test;
+
+public class TestActiveMQ {
+
+	@Test
+	public void testMQ() throws Exception{
+		//1.创建连接工厂
+		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.1.115:61616");
+		
+		//2.创建连接对象
+		Connection connection = connectionFactory.createConnection();
+		//3.开启连接
+		connection.start();
+		//4.创建一个会话session
+		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		
+		//5.创建一个Destnation对象,分为queue和topic
+		Queue queue = session.createQueue("taotao-mq");
+		
+		//6.创建一个生产者对象
+		MessageProducer producer = session.createProducer(queue);
+		
+		//7.创建一个TestMessage对象
+		TextMessage textMessage = session.createTextMessage("hello MQ5");
+		//8.发送消息
+		producer.send(textMessage);
+		//9.关闭资源
+		producer.close();
+		session.close();
+		connection.close();
+	}
+	@Test
+	public void testConsumer() throws Exception{
+		//1.创建连接工厂
+		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.1.115:61616");
+		//2.使用工厂创建一个连接
+		Connection connection = connectionFactory.createConnection();
+		//3.开启连接
+		connection.start();
+		//4.创建一个会话session
+		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		//5.创建一个Destnation对象,Destnation应该和消息的发送端一致
+		Queue queue = session.createQueue("taotao-mq");
+		//6.使用session创建一个Consumer对象
+		MessageConsumer messageConsumer = session.createConsumer(queue);
+		//7.设置一个MessageListener对象 
+		messageConsumer.setMessageListener(new MessageListener() {
+			
+			@Override
+			public void onMessage(Message message) {
+
+					TextMessage textMessage = (TextMessage) message;
+					//8.取消息的内容
+					try {
+						String text = textMessage.getText();
+						System.out.println(text);
+					} catch (JMSException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+		});
+		System.in.read();
+		
+		messageConsumer.close();
+		session.close();
+		connection.close();
+		
+	}
+	
+	public void testTopic() throws Exception{
+		//1.创建连接工厂
+		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.1.115:61616");
+		
+		//2.创建连接对象
+		Connection connection = connectionFactory.createConnection();
+		//3.开启连接
+		connection.start();
+		//4.创建一个会话session
+		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		
+		//5.创建一个Destnation对象,分为queue和topic
+		Queue queue = session.createQueue("taotao-mq");
+		
+		//6.创建一个生产者对象
+		MessageProducer producer = session.createProducer(queue);
+		
+		//7.创建一个TestMessage对象
+		TextMessage textMessage = session.createTextMessage("hello MQ5");
+		//8.发送消息
+		producer.send(textMessage);
+		//9.关闭资源
+		producer.close();
+		session.close();
+		connection.close();
+	}
+}

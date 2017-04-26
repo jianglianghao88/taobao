@@ -1,0 +1,39 @@
+package com.taotao.portal.service.impl;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.taotao.common.utils.CookieUtils;
+import com.taotao.common.utils.HttpClientUtil;
+import com.taotao.pojo.TbUser;
+import com.taotao.portal.service.UserService;
+
+public class UserServiceImpl implements UserService {
+	
+	@Value("${SSO_BASE_URL}")
+	private String SSO_BASE_URL;
+	@Value("${SSO_USER_TOKEN_SERVICE}")
+	private String SSO_USER_TOKEN_SERVICE;
+
+	@Override
+	public TbUser getUserByToken(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		String token = CookieUtils.getCookieValue(request, "TT_TOKEN");
+		
+		if(StringUtils.isBlank(token)){
+			return null;
+		}
+		
+		String json = HttpClientUtil.doGet(SSO_BASE_URL + SSO_USER_TOKEN_SERVICE + token);
+		
+		
+		
+		return null;
+	}
+
+}
